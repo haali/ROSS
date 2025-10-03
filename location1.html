@@ -1,0 +1,52 @@
+<iframe id="streetview-frame" src="https://www.google.com/maps/embed?pb=!4v1759505328999!6m8!1m7!1s-51Rs5BjITrVUBjcwVChHQ!2m2!1d39.67388443482479!2d-75.94766845808608!3f0!4f0!5f0.4000000000000002" width="100%" height="400px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+<script>
+let currentLat = 39.6738844;
+let currentLng = -75.9476685;
+
+function updateStreetView(lat, lng) {
+    currentLat = lat;
+    currentLng = lng;
+    
+    // Update the iframe with new coordinates
+    const iframe = document.getElementById('streetview-frame');
+    const timestamp = Date.now(); // Add timestamp to make URL unique
+    const streetViewUrl = `https://www.google.com/maps/embed?pb=!4v${timestamp}!6m8!1m7!1s0x0:0x0!2m2!1d${lat}!2d${lng}!3f0!4f0!5f0.4000000000000002`;
+    iframe.src = streetViewUrl;
+}
+
+// Listen for Experience Builder feature selection events
+window.addEventListener('message', function(event) {
+    console.log('Received message:', event.data); // Debug logging
+    
+    // Try multiple possible event data structures
+    if (event.data) {
+        let feature = null;
+        
+        // Check different possible structures
+        if (event.data.feature) {
+            feature = event.data.feature;
+        } else if (event.data.selectedFeature) {
+            feature = event.data.selectedFeature;
+        } else if (event.data.features && event.data.features.length > 0) {
+            feature = event.data.features[0];
+        }
+        
+        if (feature && feature.attributes) {
+            const attrs = feature.attributes;
+            if (attrs.X_Mid && attrs.Y_Mid) {
+                console.log('Updating with coordinates:', attrs.Y_Mid, attrs.X_Mid);
+                updateStreetView(attrs.Y_Mid, attrs.X_Mid);
+            }
+        }
+    }
+});
+
+// Also listen for jimu framework events
+if (window.jimu) {
+    console.log('Jimu framework detected');
+}
+
+// Initialize with default coordinates
+updateStreetView(currentLat, currentLng);
+</script>

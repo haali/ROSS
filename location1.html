@@ -8,14 +8,12 @@ function updateStreetView(lat, lng) {
     currentLat = lat;
     currentLng = lng;
     const iframe = document.getElementById('streetview-frame');
-    // Use the "search" embed to center at the coordinates for Street View
     const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}&cbp=11,0,0,0,0&z=17&output=svembed`;
     iframe.src = streetViewUrl;
 }
 
-// Listen for Experience Builder feature selection events
 window.addEventListener('message', function(event) {
-    // Try multiple possible event data structures
+    console.log('Received message:', event.data); // Debugging line
     if (event.data) {
         let feature = null;
         if (event.data.feature) {
@@ -27,13 +25,15 @@ window.addEventListener('message', function(event) {
         }
         if (feature && feature.attributes) {
             const attrs = feature.attributes;
-            if (attrs.X_Mid && attrs.Y_Mid) {
-                updateStreetView(attrs.Y_Mid, attrs.X_Mid);
+            // Try multiple possible field names
+            let lat = attrs.Y_Mid || attrs.y_mid || attrs.Latitude || attrs.latitude;
+            let lng = attrs.X_Mid || attrs.x_mid || attrs.Longitude || attrs.longitude;
+            if (lat && lng) {
+                updateStreetView(lat, lng);
             }
         }
     }
 });
 
-// Initialize with default coordinates
 updateStreetView(currentLat, currentLng);
 </script>
